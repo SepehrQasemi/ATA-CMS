@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { loginAction } from "@/app/(admin)/admin/login/actions";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -42,7 +41,7 @@ export default async function AdminLoginPage({
                 Use the local admin credentials defined in your environment.
               </p>
             </div>
-            <form action={loginAction} className="mt-8 space-y-5">
+            <form action="/admin/auth/login" method="post" className="mt-8 space-y-5">
               <div>
                 <Label htmlFor="email">Email</Label>
                 <Input

@@ -33,7 +33,7 @@ test("admin login opens the editorial dashboard and inquiry queue", async ({
   ).toBeVisible();
   await expect(page.getByRole("link", { name: /open products/i })).toBeVisible();
 
-  await page.goto("/admin/inquiries");
+  await page.getByRole("link", { name: /^inquiries$/i }).click();
   await expect(
     page.getByRole("heading", { name: /inbound inquiry queue/i }),
   ).toBeVisible();

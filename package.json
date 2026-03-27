@@ -1,7 +1,28 @@
 {
   "name": "ata-cms",
   "version": "0.1.0",
+  "description": "ATA-CMS is the implementation repository for the Abadis Tejarat Arka multilingual catalog website and lightweight admin CMS.",
   "private": true,
+  "license": "UNLICENSED",
+  "homepage": "https://github.com/SepehrQasemi/ATA-CMS",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SepehrQasemi/ATA-CMS.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SepehrQasemi/ATA-CMS/issues"
+  },
+  "keywords": [
+    "nextjs",
+    "prisma",
+    "cms",
+    "catalog",
+    "b2b",
+    "multilingual"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

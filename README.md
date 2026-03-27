@@ -12,6 +12,22 @@ The public product remains the ATA website. This repository is the implementatio
 - Inquiry persistence works locally without paid third-party services
 - Admin CRUD foundation exists for pages, categories, manufacturers, products, media, inquiries, and settings
 - SEO foundation exists: metadata, canonicals, hreflang, sitemap, robots, publication protections
+- GitHub Actions CI verifies lint, typecheck, unit tests, and production build on push/PR
+
+## What ATA-CMS Includes
+
+- public multilingual catalog website for `en` and `fr`
+- lightweight admin CMS for pages, categories, manufacturers, products, media, inquiries, and settings
+- local-safe inquiry persistence without paid third-party dependencies
+- SEO and publication controls aligned to the specification package
+
+## What ATA-CMS Does Not Include
+
+- cart, checkout, or online payment
+- ecommerce ordering flow
+- CRM integration in MVP
+- supplier/reseller modeling in MVP
+- public `fa` launch in MVP
 
 ## Quickest Local Start
 

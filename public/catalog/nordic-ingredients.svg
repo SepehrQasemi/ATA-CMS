@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="title desc">
+  <title id="title">Nordic Ingredients</title>
+  <desc id="desc">Illustrative ATA manufacturer artwork for Nordic Ingredients.</desc>
+  <rect width="400" height="400" rx="48" fill="#fff8f8" />
+  <rect x="92" y="92" width="216" height="216" rx="40" fill="#4d0f22" />
+  <rect x="126" y="126" width="148" height="148" rx="30" fill="#ffffff" opacity="0.14" />
+  <text x="200" y="224" text-anchor="middle" font-family="Arial, sans-serif" font-size="58" font-weight="800" fill="#ffffff">NI</text>
+</svg>

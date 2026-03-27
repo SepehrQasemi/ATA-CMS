@@ -1,0 +1,7 @@
+ATA PRODUCT DOCUMENT
+
+Product: Sodium Bicarbonate
+Document type: Brochure
+
+This sample file exists to prove lightweight product document handling
+without introducing a paid storage dependency in the MVP foundation.

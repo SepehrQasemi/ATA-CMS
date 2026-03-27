@@ -33,6 +33,7 @@ prisma/dev.db-journal
 # Testing
 playwright-report/
 test-results/
+output/
 
 # Editor / OS
 .DS_Store

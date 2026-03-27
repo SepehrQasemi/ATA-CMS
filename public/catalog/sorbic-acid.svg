@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">Sorbic acid</title>
+  <desc id="desc">Illustrative ATA catalog artwork for sorbic acid.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff4f4" />
+      <stop offset="100%" stop-color="#ffdede" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)" rx="48" />
+  <circle cx="820" cy="260" r="190" fill="#4d0f22" opacity="0.12" />
+  <path d="M760 430C850 150 990 140 1060 360" fill="none" stroke="#e41414" stroke-width="26" stroke-linecap="round" />
+  <rect x="86" y="96" width="330" height="42" rx="21" fill="#ffffff" />
+  <text x="112" y="124" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#4d0f22">ATA CATALOG</text>
+  <text x="90" y="250" font-family="Arial, sans-serif" font-size="82" font-weight="800" fill="#181212">Sorbic Acid</text>
+  <text x="92" y="336" font-family="Arial, sans-serif" font-size="28" fill="#5f5963">Preservative ingredient profile</text>
+  <rect x="92" y="468" width="234" height="56" rx="28" fill="#ffffff" stroke="#efcdcd" stroke-width="3" />
+  <text x="128" y="504" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#4d0f22">Out of stock</text>
+</svg>

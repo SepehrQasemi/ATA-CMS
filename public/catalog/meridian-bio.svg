@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="title desc">
+  <title id="title">Meridian Bio</title>
+  <desc id="desc">Illustrative ATA manufacturer artwork for Meridian Bio.</desc>
+  <rect width="400" height="400" rx="48" fill="#fff4f4" />
+  <circle cx="200" cy="200" r="120" fill="#e41414" opacity="0.16" />
+  <circle cx="200" cy="200" r="76" fill="#4d0f22" />
+  <text x="200" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="62" font-weight="800" fill="#ffffff">MB</text>
+</svg>

@@ -12,8 +12,14 @@ type SiteFrameProps = {
 export async function SiteFrame({ children, locale }: SiteFrameProps) {
   return (
     <div className="min-h-screen">
+      <a
+        href="#main-content"
+        className="focus-ring sr-only absolute left-4 top-4 z-50 rounded-full bg-white px-4 py-2 text-sm font-semibold shadow-sm focus:not-sr-only"
+      >
+        {locale === "fr" ? "Aller au contenu" : "Skip to content"}
+      </a>
       <SiteHeader locale={locale} />
-      <main>{children}</main>
+      <main id="main-content">{children}</main>
       <SiteFooter locale={locale} />
     </div>
   );

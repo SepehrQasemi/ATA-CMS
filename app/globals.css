@@ -143,6 +143,57 @@ select {
   background: linear-gradient(90deg, transparent, rgba(239, 205, 205, 0.85), transparent);
 }
 
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal-rise {
+  animation: rise-in 0.7s ease-out both;
+}
+
+.reveal-delay-1 {
+  animation-delay: 0.1s;
+}
+
+.reveal-delay-2 {
+  animation-delay: 0.18s;
+}
+
+.interactive-panel {
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.interactive-panel:hover {
+  transform: translateY(-4px);
+  border-color: rgba(228, 20, 20, 0.25);
+  box-shadow: var(--shadow-glow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-rise {
+    animation: none;
+  }
+
+  .interactive-panel {
+    transition: none;
+  }
+
+  .interactive-panel:hover {
+    transform: none;
+  }
+}
+
 @media (min-width: 900px) {
   .hero-grid {
     grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);

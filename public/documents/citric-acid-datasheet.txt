@@ -1,0 +1,9 @@
+ATA PRODUCT DOCUMENT
+
+Product: Citric Acid Monohydrate
+Document type: Datasheet
+
+This is a local MVP-safe sample document used to validate:
+- product document attachment support
+- public document visibility
+- localized labeling in the admin and public UI

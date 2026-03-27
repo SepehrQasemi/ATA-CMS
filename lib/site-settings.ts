@@ -1,4 +1,5 @@
 import type { PublicLocale } from "@/lib/i18n/config";
+import { sanitizeHref } from "@/lib/safe-url";
 
 export type SiteAddress = {
   city?: string;
@@ -80,9 +81,9 @@ export function parseSocialLinks(
   const socialMap = parseJson<Record<string, string>>(raw, {});
 
   return Object.entries(socialMap)
-    .filter(([, href]) => Boolean(href))
     .map(([key, href]) => ({
-      href,
+      href: sanitizeHref(href),
       label: formatSocialLabel(key),
-    }));
+    }))
+    .filter((item): item is SiteSocialLink => Boolean(item.href));
 }

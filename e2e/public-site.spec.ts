@@ -51,6 +51,21 @@ test("contact inquiry flow stores a submission and confirms success", async ({
   ).toBeVisible();
 });
 
+test("invalid inquiry submission keeps the user on the form with readable errors", async ({
+  page,
+}) => {
+  await page.goto("/en/contact");
+
+  await page.getByLabel(/contact name/i).fill("   ");
+  await page.getByLabel(/^email$/i).fill("qa-invalid@example.com");
+  await page.getByLabel(/^message$/i).fill("short");
+  await page.getByText(/i agree to be contacted/i).click();
+  await page.getByRole("button", { name: /send inquiry/i }).click();
+
+  await expect(page).toHaveURL(/\/en\/contact/);
+  await expect(page.getByText(/contact name is required/i)).toBeVisible();
+});
+
 test("non-public Persian routes stay unavailable", async ({ page }) => {
   const response = await page.goto("/fa");
   expect(response?.status()).toBe(404);
@@ -88,6 +103,17 @@ test("missing localized product routes render the not-found recovery UI", async 
 
   await expect(page.getByRole("heading", { name: /content not found/i })).toBeVisible();
   await expect(page.getByRole("link", { name: /browse products/i })).toBeVisible();
+});
+
+test("product documents render only when public document content exists", async ({
+  page,
+}) => {
+  await page.goto("/en/products/citric-acid-monohydrate");
+  await expect(page.getByRole("heading", { name: /^documents$/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /citric acid datasheet/i })).toBeVisible();
+
+  await page.goto("/en/products/sorbic-acid");
+  await expect(page.getByRole("heading", { name: /^documents$/i })).toHaveCount(0);
 });
 
 test("mobile navigation exposes catalog entry points", async ({ page }) => {

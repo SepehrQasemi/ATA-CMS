@@ -38,3 +38,23 @@ test("admin login opens the editorial dashboard and inquiry queue", async ({
     page.getByRole("heading", { name: /inbound inquiry queue/i }),
   ).toBeVisible();
 });
+
+test("admin users can sign out and lose access to protected routes", async ({
+  page,
+}) => {
+  await page.goto("/admin/login");
+
+  await page.getByLabel(/^email$/i).fill(adminEmail);
+  await page.getByLabel(/^password$/i).fill(adminPassword);
+  await page.getByRole("button", { name: /enter admin/i }).click();
+
+  await expect(
+    page.getByRole("heading", { name: /ata-cms dashboard/i }),
+  ).toBeVisible();
+
+  await page.getByRole("link", { name: /sign out/i }).click();
+  await expect(page).toHaveURL(/\/admin\/login$/);
+
+  await page.goto("/admin/products");
+  await expect(page).toHaveURL(/\/admin\/login$/);
+});

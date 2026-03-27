@@ -40,4 +40,21 @@ describe("site settings helpers", () => {
       },
     ]);
   });
+
+  it("filters unsafe or malformed social links", () => {
+    expect(
+      parseSocialLinks(
+        JSON.stringify({
+          linkedin: "javascript:alert(1)",
+          whatsapp: "https://wa.me/33123456789",
+          youtube: "notaurl",
+        }),
+      ),
+    ).toEqual([
+      {
+        href: "https://wa.me/33123456789",
+        label: "WhatsApp",
+      },
+    ]);
+  });
 });

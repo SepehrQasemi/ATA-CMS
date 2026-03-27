@@ -6,23 +6,51 @@ export type PricingInput = {
   unitLabel: string | null | undefined;
 };
 
-export function hasPublicPrice(amount: number | null | undefined) {
-  return typeof amount === "number";
+function isSupportedCurrencyCode(value: string) {
+  const normalized = value.trim().toUpperCase();
+
+  if (!normalized || normalized.length !== 3) {
+    return false;
+  }
+
+  if (typeof Intl.supportedValuesOf !== "function") {
+    return true;
+  }
+
+  return Intl.supportedValuesOf("currency").includes(normalized);
+}
+
+export function hasPublicPrice(
+  amount: number | null | undefined,
+): amount is number {
+  return typeof amount === "number" && Number.isFinite(amount);
 }
 
 export function resolvePricingMessage(input: PricingInput) {
-  if (hasPublicPrice(input.amount) && input.currency) {
-    const formatter = new Intl.NumberFormat(input.locale, {
-      style: "currency",
-      currency: input.currency,
-      maximumFractionDigits: 2,
-    });
+  const amount = input.amount;
 
-    const formatted = formatter.format(input.amount);
-    return input.unitLabel ? `${formatted} / ${input.unitLabel}` : formatted;
+  if (hasPublicPrice(amount) && input.currency && isSupportedCurrencyCode(input.currency)) {
+    try {
+      const formatter = new Intl.NumberFormat(input.locale, {
+        style: "currency",
+        currency: input.currency.trim().toUpperCase(),
+        maximumFractionDigits: 2,
+      });
+
+      const formatted = formatter.format(amount);
+      return input.unitLabel ? `${formatted} / ${input.unitLabel}` : formatted;
+    } catch {
+      // Invalid currency codes should degrade to the inquiry fallback.
+    }
   }
 
-  return input.message ?? "";
+  if (typeof input.message === "string" && input.message.trim().length > 0) {
+    return input.message.trim();
+  }
+
+  return input.locale === "fr"
+    ? "Contactez ATA pour le prix."
+    : "Contact ATA for pricing.";
 }
 
 export function hasPricingFallback(input: PricingInput) {

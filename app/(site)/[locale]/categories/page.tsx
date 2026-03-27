@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { CategoryCard } from "@/components/site/category-card";
 import { Card } from "@/components/ui/card";
 import type { PublicLocale } from "@/lib/i18n/config";
+import { getDisplayText } from "@/lib/public/content";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getCategoriesIndexData } from "@/lib/public/queries";
 import { getPageAlternatePathnames } from "@/lib/public/seo";
@@ -84,10 +85,25 @@ export default async function CategoriesIndexPage({
             {data.page.translation.seoTitle ?? data.page.translation.title}
           </h1>
           <p className="max-w-3xl text-lg leading-8 text-muted">
-            {data.page.translation.summary}
+            {getDisplayText(
+              data.page.translation.summary,
+              locale === "fr"
+                ? "Explorez la structure multi-niveaux du catalogue."
+                : "Explore the multi-level catalog structure.",
+            )}
           </p>
         </div>
-        <Card className="p-8">{renderTree(locale, data.categoryTree)}</Card>
+        <Card className="p-8">
+          {data.categoryTree.length > 0 ? (
+            renderTree(locale, data.categoryTree)
+          ) : (
+            <p className="text-sm leading-7 text-muted">
+              {locale === "fr"
+                ? "Aucune categorie publique n est encore disponible."
+                : "No public categories are available yet."}
+            </p>
+          )}
+        </Card>
       </div>
     </section>
   );

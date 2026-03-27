@@ -29,6 +29,12 @@ async function resetDatabase() {
   await prisma.manufacturerTranslation.deleteMany();
   await prisma.manufacturer.deleteMany();
   await prisma.categoryTranslation.deleteMany();
+  // Break the self-referential tree before clearing categories so resets stay deterministic.
+  await prisma.category.updateMany({
+    data: {
+      parentId: null,
+    },
+  });
   await prisma.category.deleteMany();
   await prisma.pageTranslation.deleteMany();
   await prisma.page.deleteMany();

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { ManufacturerCard } from "@/components/site/manufacturer-card";
 import type { PublicLocale } from "@/lib/i18n/config";
+import { getDisplayText } from "@/lib/public/content";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getManufacturersIndexData } from "@/lib/public/queries";
 import { getPageAlternatePathnames } from "@/lib/public/seo";
@@ -51,23 +52,36 @@ export default async function ManufacturersIndexPage({
             {data.page.translation.seoTitle ?? data.page.translation.title}
           </h1>
           <p className="max-w-3xl text-lg leading-8 text-muted">
-            {data.page.translation.summary}
+            {getDisplayText(
+              data.page.translation.summary,
+              locale === "fr"
+                ? "Les fabricants publics verifies seront presentes ici."
+                : "Verified public manufacturers will be presented here.",
+            )}
           </p>
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
-          {data.manufacturers.map((manufacturer) => (
-            <ManufacturerCard
-              key={manufacturer.id}
-              locale={locale}
-              slug={manufacturer.translation.slug}
-              name={manufacturer.translation.name}
-              summary={manufacturer.translation.summary ?? ""}
-              productCount={manufacturer._count.products}
-              logoUrl={manufacturer.logoMedia?.publicUrl}
-            />
-          ))}
-        </div>
+        {data.manufacturers.length > 0 ? (
+          <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+            {data.manufacturers.map((manufacturer) => (
+              <ManufacturerCard
+                key={manufacturer.id}
+                locale={locale}
+                slug={manufacturer.translation.slug}
+                name={manufacturer.translation.name}
+                summary={manufacturer.translation.summary ?? ""}
+                productCount={manufacturer._count.products}
+                logoUrl={manufacturer.logoMedia?.publicUrl}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-3xl border border-line bg-white px-5 py-4 text-sm leading-7 text-muted">
+            {locale === "fr"
+              ? "Aucun fabricant public n est encore publie."
+              : "No public manufacturers are published yet."}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -39,4 +39,38 @@ describe("pricing rules", () => {
       }),
     ).toBe(true);
   });
+
+  test("fails safely when the currency code is invalid", () => {
+    expect(
+      resolvePricingMessage({
+        locale: "en",
+        amount: 21.5,
+        currency: "BAD",
+        message: "  Contact ATA for pricing.  ",
+        unitLabel: "kg",
+      }),
+    ).toBe("Contact ATA for pricing.");
+  });
+
+  test("uses a generic localized fallback when neither price nor message is usable", () => {
+    expect(
+      resolvePricingMessage({
+        locale: "fr",
+        amount: null,
+        currency: null,
+        message: "   ",
+        unitLabel: null,
+      }),
+    ).toBe("Contactez ATA pour le prix.");
+
+    expect(
+      hasPricingFallback({
+        locale: "en",
+        amount: null,
+        currency: null,
+        message: "   ",
+        unitLabel: null,
+      }),
+    ).toBe(false);
+  });
 });

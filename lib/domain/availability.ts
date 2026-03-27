@@ -1,6 +1,6 @@
 import type { AvailabilityStatus } from "@prisma/client";
 
-const availabilityLabels = {
+const availabilityLabels: Record<"en" | "fr", Record<string, string>> = {
   en: {
     in_stock: "In stock",
     available_on_request: "Available on request",
@@ -11,13 +11,16 @@ const availabilityLabels = {
     in_stock: "En stock",
     available_on_request: "Disponible sur demande",
     out_of_stock: "Rupture de stock",
-    discontinued: "Arrêté",
+    discontinued: "Arrete",
   },
-} as const;
+};
 
 export function getAvailabilityLabel(
   locale: "en" | "fr",
-  status: AvailabilityStatus,
+  status: AvailabilityStatus | string,
 ) {
-  return availabilityLabels[locale][status];
+  return (
+    availabilityLabels[locale][status] ??
+    availabilityLabels[locale].available_on_request
+  );
 }

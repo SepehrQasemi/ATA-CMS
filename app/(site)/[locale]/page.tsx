@@ -9,6 +9,10 @@ import { ManufacturerCard } from "@/components/site/manufacturer-card";
 import { ProductCard } from "@/components/site/product-card";
 import { resolvePricingMessage } from "@/lib/domain/pricing";
 import type { PublicLocale } from "@/lib/i18n/config";
+import {
+  getDefaultPricingFallbackMessage,
+  getDisplayText,
+} from "@/lib/public/content";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getHomeData } from "@/lib/public/queries";
 import { getPageAlternatePathnames } from "@/lib/public/seo";
@@ -72,10 +76,20 @@ export default async function HomePage({
             <Badge variant="muted">Abadis Tejarat Arka</Badge>
             <div className="space-y-5">
               <h1 className="max-w-4xl text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.05em] sm:text-6xl">
-                {data.page.translation.heroHeading ?? data.settings.translation?.siteTagline}
+                {getDisplayText(
+                  data.page.translation.heroHeading ?? data.settings.translation?.siteTagline,
+                  locale === "fr"
+                    ? "Sourcing fabricant pour conversations B2B serieuses"
+                    : "Manufacturer-aware sourcing for serious B2B buying teams",
+                )}
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-muted">
-                {data.page.translation.summary}
+                {getDisplayText(
+                  data.page.translation.summary,
+                  locale === "fr"
+                    ? "Le site public structure produits, categories et fabricants pour des demandes B2B claires."
+                    : "The public site structures products, categories, and manufacturers for clear B2B inquiries.",
+                )}
               </p>
             </div>
             <div className="flex flex-wrap gap-4">
@@ -103,7 +117,12 @@ export default async function HomePage({
               <div className="eyebrow border-white/10 bg-white/10 text-white/75">ATA</div>
               <div className="space-y-3">
                 <h2 className="text-3xl font-semibold tracking-[-0.03em]">
-                  {data.settings.translation?.siteTagline}
+                  {getDisplayText(
+                    data.settings.translation?.siteTagline,
+                    locale === "fr"
+                      ? "Structure catalogue et demandes B2B"
+                      : "Structured catalog and B2B inquiry flow",
+                  )}
                 </h2>
                 <p className="text-sm leading-7 text-white/76">
                   {locale === "fr"
@@ -117,14 +136,20 @@ export default async function HomePage({
                     {locale === "fr" ? "Categories en avant" : "Featured categories"}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2 text-sm">
-                    {data.featuredCategories.map((category) => (
-                      <span
-                        key={category.id}
-                        className="rounded-full border border-white/10 bg-white/10 px-3 py-2"
-                      >
-                        {category.translation?.name}
+                    {data.featuredCategories.length > 0 ? (
+                      data.featuredCategories.map((category) => (
+                        <span
+                          key={category.id}
+                          className="rounded-full border border-white/10 bg-white/10 px-3 py-2"
+                        >
+                          {category.translation?.name}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="rounded-full border border-white/10 bg-white/10 px-3 py-2">
+                        {locale === "fr" ? "Selection en preparation" : "Selection in progress"}
                       </span>
-                    ))}
+                    )}
                   </div>
                 </div>
                 <div className="rounded-3xl border border-white/10 bg-white/8 p-4">
@@ -132,9 +157,13 @@ export default async function HomePage({
                     {locale === "fr" ? "Fabricants en avant" : "Featured manufacturers"}
                   </p>
                   <div className="mt-3 space-y-2 text-sm text-white/84">
-                    {data.featuredManufacturers.map((manufacturer) => (
-                      <p key={manufacturer.id}>{manufacturer.translation?.name}</p>
-                    ))}
+                    {data.featuredManufacturers.length > 0 ? (
+                      data.featuredManufacturers.map((manufacturer) => (
+                        <p key={manufacturer.id}>{manufacturer.translation?.name}</p>
+                      ))
+                    ) : (
+                      <p>{locale === "fr" ? "Profils a venir" : "Profiles coming soon"}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -155,17 +184,25 @@ export default async function HomePage({
                 : "Clear category entry points for a B2B catalog"}
             </h2>
           </div>
-          <div className="grid gap-5 lg:grid-cols-2">
-            {data.featuredCategories.map((category) => (
-              <CategoryCard
-                key={category.id}
-                locale={locale}
-                name={category.translation?.name ?? category.code}
-                path={category.translation?.fullSlugPathCache ?? ""}
-                description={category.translation?.shortDescription}
-              />
-            ))}
-          </div>
+          {data.featuredCategories.length > 0 ? (
+            <div className="grid gap-5 lg:grid-cols-2">
+              {data.featuredCategories.map((category) => (
+                <CategoryCard
+                  key={category.id}
+                  locale={locale}
+                  name={category.translation?.name ?? category.code}
+                  path={category.translation?.fullSlugPathCache ?? ""}
+                  description={category.translation?.shortDescription}
+                />
+              ))}
+            </div>
+          ) : (
+            <Card className="p-6 text-sm leading-7 text-muted">
+              {locale === "fr"
+                ? "Les categories mises en avant seront ajoutees ici."
+                : "Featured categories will be added here."}
+            </Card>
+          )}
         </div>
       </section>
 
@@ -179,30 +216,38 @@ export default async function HomePage({
                 : "Product pages built for inquiry-led buying decisions"}
             </h2>
           </div>
-          <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-4">
-            {data.featuredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                locale={locale}
-                slug={product.translation.slug}
-                name={product.translation.name}
-                shortDescription={product.translation.shortDescription}
-                manufacturerName={product.manufacturerTranslation?.name}
-                availabilityStatus={product.availabilityStatus}
-                priceLabel={resolvePricingMessage({
-                  locale,
-                  amount: product.publicPriceAmount ? Number(product.publicPriceAmount) : null,
-                  currency: product.publicPriceCurrency,
-                  unitLabel: product.publicPriceUnitLabel,
-                  message:
-                    product.translation.contactForPricingMessage ??
-                    data.settings.translation?.defaultContactForPricingMessage ??
-                    "",
-                })}
-                imageUrl={product.primaryImage?.publicUrl}
-              />
-            ))}
-          </div>
+          {data.featuredProducts.length > 0 ? (
+            <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-4">
+              {data.featuredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  locale={locale}
+                  slug={product.translation.slug}
+                  name={product.translation.name}
+                  shortDescription={product.translation.shortDescription}
+                  manufacturerName={product.manufacturerTranslation?.name}
+                  availabilityStatus={product.availabilityStatus}
+                  priceLabel={resolvePricingMessage({
+                    locale,
+                    amount: product.publicPriceAmount ? Number(product.publicPriceAmount) : null,
+                    currency: product.publicPriceCurrency,
+                    unitLabel: product.publicPriceUnitLabel,
+                    message:
+                      product.translation.contactForPricingMessage ??
+                      data.settings.translation?.defaultContactForPricingMessage ??
+                      getDefaultPricingFallbackMessage(locale),
+                  })}
+                  imageUrl={product.primaryImage?.publicUrl}
+                />
+              ))}
+            </div>
+          ) : (
+            <Card className="p-6 text-sm leading-7 text-muted">
+              {locale === "fr"
+                ? "Les produits mis en avant seront publies ici."
+                : "Featured products will be published here."}
+            </Card>
+          )}
         </div>
       </section>
 
@@ -218,19 +263,27 @@ export default async function HomePage({
                 : "Manufacturer profiles that add trust, not just labels"}
             </h2>
           </div>
-          <div className="grid gap-5 lg:grid-cols-3">
-            {data.featuredManufacturers.map((manufacturer) => (
-              <ManufacturerCard
-                key={manufacturer.id}
-                locale={locale}
-                slug={manufacturer.translation?.slug ?? ""}
-                name={manufacturer.translation?.name ?? manufacturer.code}
-                summary={manufacturer.translation?.summary ?? ""}
-                productCount={manufacturer._count.products}
-                logoUrl={manufacturer.logoMedia?.publicUrl}
-              />
-            ))}
-          </div>
+          {data.featuredManufacturers.length > 0 ? (
+            <div className="grid gap-5 lg:grid-cols-3">
+              {data.featuredManufacturers.map((manufacturer) => (
+                <ManufacturerCard
+                  key={manufacturer.id}
+                  locale={locale}
+                  slug={manufacturer.translation?.slug ?? ""}
+                  name={manufacturer.translation?.name ?? manufacturer.code}
+                  summary={manufacturer.translation?.summary ?? ""}
+                  productCount={manufacturer._count.products}
+                  logoUrl={manufacturer.logoMedia?.publicUrl}
+                />
+              ))}
+            </div>
+          ) : (
+            <Card className="p-6 text-sm leading-7 text-muted">
+              {locale === "fr"
+                ? "Les profils fabricants mis en avant seront ajoutes ici."
+                : "Featured manufacturer profiles will be added here."}
+            </Card>
+          )}
         </div>
       </section>
 
@@ -247,7 +300,12 @@ export default async function HomePage({
                   : "Need pricing, lead time, or supporting documents?"}
               </h2>
               <p className="max-w-2xl text-base leading-7 text-muted">
-                {data.settings.translation?.contactIntro}
+                {getDisplayText(
+                  data.settings.translation?.contactIntro,
+                  locale === "fr"
+                    ? "Expliquez votre besoin produit, prix ou documentation pour recevoir une reponse B2B."
+                    : "Explain your product, pricing, or documentation need to receive a B2B response.",
+                )}
               </p>
             </div>
             <Button asChild size="lg">

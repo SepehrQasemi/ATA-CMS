@@ -1,3 +1,4 @@
+import { PublishStatus } from "@prisma/client";
 import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
@@ -8,10 +9,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { prisma } from "@/lib/db";
 import type { PublicLocale } from "@/lib/i18n/config";
+import { getDisplayText } from "@/lib/public/content";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getPublicPage, getSiteChrome } from "@/lib/public/queries";
 import { getPageAlternatePathnames } from "@/lib/public/seo";
 import { formatSiteAddressLines, parseSocialLinks } from "@/lib/site-settings";
+import { INQUIRY_FIELD_LIMITS } from "@/lib/validation/inquiries";
 
 import { submitInquiryAction } from "./actions";
 
@@ -58,18 +61,48 @@ export default async function ContactPage({
     getPublicPage(locale, "contact"),
     getSiteChrome(locale),
     query.product
-      ? prisma.product.findUnique({
-          where: { id: query.product },
+      ? prisma.product.findFirst({
+          where: {
+            id: query.product,
+            publishStatus: PublishStatus.published,
+            translations: {
+              some: {
+                localeCode: locale,
+                publishStatus: PublishStatus.published,
+              },
+            },
+          },
           include: {
-            translations: { where: { localeCode: locale }, take: 1 },
+            translations: {
+              where: {
+                localeCode: locale,
+                publishStatus: PublishStatus.published,
+              },
+              take: 1,
+            },
           },
         })
       : null,
     query.manufacturer
-      ? prisma.manufacturer.findUnique({
-          where: { id: query.manufacturer },
+      ? prisma.manufacturer.findFirst({
+          where: {
+            id: query.manufacturer,
+            publishStatus: PublishStatus.published,
+            translations: {
+              some: {
+                localeCode: locale,
+                publishStatus: PublishStatus.published,
+              },
+            },
+          },
           include: {
-            translations: { where: { localeCode: locale }, take: 1 },
+            translations: {
+              where: {
+                localeCode: locale,
+                publishStatus: PublishStatus.published,
+              },
+              take: 1,
+            },
           },
         })
       : null,
@@ -93,7 +126,12 @@ export default async function ContactPage({
             {page.translation.seoTitle ?? page.translation.title}
           </h1>
           <p className="max-w-3xl text-lg leading-8 text-muted">
-            {settings.translation?.contactIntro ?? page.translation.summary}
+            {getDisplayText(
+              settings.translation?.contactIntro ?? page.translation.summary,
+              locale === "fr"
+                ? "Expliquez votre besoin produit, disponibilite ou documentation. ATA vous repondra depuis le CMS local."
+                : "Explain your product, availability, or documentation need. ATA will respond from the local CMS workflow.",
+            )}
           </p>
         </div>
 
@@ -211,6 +249,7 @@ export default async function ContactPage({
                   id="contactName"
                   name="contactName"
                   autoComplete="name"
+                  maxLength={INQUIRY_FIELD_LIMITS.contactName}
                   required
                 />
               </div>
@@ -222,6 +261,7 @@ export default async function ContactPage({
                   id="companyName"
                   name="companyName"
                   autoComplete="organization"
+                  maxLength={INQUIRY_FIELD_LIMITS.companyName}
                 />
               </div>
               <div>
@@ -231,20 +271,42 @@ export default async function ContactPage({
                   name="email"
                   type="email"
                   autoComplete="email"
+                  maxLength={INQUIRY_FIELD_LIMITS.email}
                   required
                 />
               </div>
               <div>
                 <Label htmlFor="phone">{locale === "fr" ? "Telephone" : "Phone"}</Label>
-                <Input id="phone" name="phone" autoComplete="tel" />
+                <Input
+                  id="phone"
+                  name="phone"
+                  autoComplete="tel"
+                  maxLength={INQUIRY_FIELD_LIMITS.phone}
+                />
               </div>
               <div className="md:col-span-2">
                 <Label htmlFor="country">{locale === "fr" ? "Pays" : "Country"}</Label>
-                <Input id="country" name="country" autoComplete="country-name" />
+                <Input
+                  id="country"
+                  name="country"
+                  autoComplete="country-name"
+                  maxLength={INQUIRY_FIELD_LIMITS.country}
+                />
               </div>
               <div className="md:col-span-2">
                 <Label htmlFor="message">{locale === "fr" ? "Message" : "Message"}</Label>
-                <Textarea id="message" name="message" className="min-h-48" required />
+                <Textarea
+                  id="message"
+                  name="message"
+                  className="min-h-48"
+                  maxLength={INQUIRY_FIELD_LIMITS.message}
+                  required
+                />
+                <p className="mt-2 text-xs text-muted">
+                  {locale === "fr"
+                    ? `Maximum ${INQUIRY_FIELD_LIMITS.message} caracteres.`
+                    : `Maximum ${INQUIRY_FIELD_LIMITS.message} characters.`}
+                </p>
               </div>
               <label className="md:col-span-2 flex items-start gap-3 rounded-2xl border border-line bg-[#fff8f8] px-4 py-3 text-sm leading-6">
                 <input

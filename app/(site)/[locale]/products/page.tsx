@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ProductCard } from "@/components/site/product-card";
 import type { PublicLocale } from "@/lib/i18n/config";
 import { resolvePricingMessage } from "@/lib/domain/pricing";
+import { getDefaultPricingFallbackMessage, getDisplayText } from "@/lib/public/content";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getProductsIndexData, getSiteChrome } from "@/lib/public/queries";
 import { getPageAlternatePathnames } from "@/lib/public/seo";
@@ -55,34 +56,47 @@ export default async function ProductsIndexPage({
             {data.page.translation.seoTitle ?? data.page.translation.title}
           </h1>
           <p className="max-w-3xl text-lg leading-8 text-muted">
-            {data.page.translation.summary}
+            {getDisplayText(
+              data.page.translation.summary,
+              locale === "fr"
+                ? "Les produits publics disponibles seront presentes ici."
+                : "Publicly available catalog products will appear here.",
+            )}
           </p>
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
-          {data.products.map((product) => (
-            <ProductCard
-              key={product.id}
-              locale={locale}
-              slug={product.translation.slug}
-              name={product.translation.name}
-              shortDescription={product.translation.shortDescription}
-              manufacturerName={product.manufacturerTranslation?.name}
-              availabilityStatus={product.availabilityStatus}
-              priceLabel={resolvePricingMessage({
-                locale,
-                amount: product.publicPriceAmount ? Number(product.publicPriceAmount) : null,
-                currency: product.publicPriceCurrency,
-                unitLabel: product.publicPriceUnitLabel,
-                message:
-                  product.translation.contactForPricingMessage ??
-                  settings.translation?.defaultContactForPricingMessage ??
-                  "",
-              })}
-              imageUrl={product.primaryImage?.publicUrl}
-            />
-          ))}
-        </div>
+        {data.products.length > 0 ? (
+          <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+            {data.products.map((product) => (
+              <ProductCard
+                key={product.id}
+                locale={locale}
+                slug={product.translation.slug}
+                name={product.translation.name}
+                shortDescription={product.translation.shortDescription}
+                manufacturerName={product.manufacturerTranslation?.name}
+                availabilityStatus={product.availabilityStatus}
+                priceLabel={resolvePricingMessage({
+                  locale,
+                  amount: product.publicPriceAmount ? Number(product.publicPriceAmount) : null,
+                  currency: product.publicPriceCurrency,
+                  unitLabel: product.publicPriceUnitLabel,
+                  message:
+                    product.translation.contactForPricingMessage ??
+                    settings.translation?.defaultContactForPricingMessage ??
+                    getDefaultPricingFallbackMessage(locale),
+                })}
+                imageUrl={product.primaryImage?.publicUrl}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-3xl border border-line bg-white px-5 py-4 text-sm leading-7 text-muted">
+            {locale === "fr"
+              ? "Aucun produit public n est encore publie dans ce catalogue."
+              : "No public products are published in this catalog yet."}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,13 +1,22 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { ZodError } from "zod";
 
 import { prisma } from "@/lib/db";
 import { createInquiryRecord } from "@/lib/domain/inquiries";
 import { toBoolean, toNullableString, toRequiredString } from "@/lib/admin/utils";
+import {
+  normalizePublicLocale,
+  sanitizeInquiryRedirectPath,
+} from "@/lib/public/forms";
 
 export async function submitInquiryAction(formData: FormData) {
-  const redirectTo = toRequiredString(formData.get("redirectTo"));
+  const locale = normalizePublicLocale(toRequiredString(formData.get("sourceLocaleCode")));
+  const redirectTo = sanitizeInquiryRedirectPath(
+    toRequiredString(formData.get("redirectTo")),
+    locale,
+  );
 
   try {
     await createInquiryRecord(prisma, {
@@ -18,10 +27,7 @@ export async function submitInquiryAction(formData: FormData) {
           | "manufacturer_inquiry"
           | "pricing_request"
           | null) ?? "general",
-      sourceLocaleCode: toRequiredString(formData.get("sourceLocaleCode")) as
-        | "en"
-        | "fr"
-        | "fa",
+      sourceLocaleCode: locale,
       sourcePageId: toNullableString(formData.get("sourcePageId")),
       productId: toNullableString(formData.get("productId")),
       manufacturerId: toNullableString(formData.get("manufacturerId")),
@@ -38,7 +44,11 @@ export async function submitInquiryAction(formData: FormData) {
     });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Inquiry submission failed.";
+      error instanceof ZodError
+        ? error.issues[0]?.message ?? "Please review the inquiry form and try again."
+        : error instanceof Error
+          ? error.message
+          : "Inquiry submission failed.";
     redirect(`${redirectTo}?error=${encodeURIComponent(message)}`);
   }
 

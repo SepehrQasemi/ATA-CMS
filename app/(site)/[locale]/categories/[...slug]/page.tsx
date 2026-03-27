@@ -7,6 +7,10 @@ import { ProductCard } from "@/components/site/product-card";
 import { Button } from "@/components/ui/button";
 import { resolvePricingMessage } from "@/lib/domain/pricing";
 import type { PublicLocale } from "@/lib/i18n/config";
+import {
+  getDefaultPricingFallbackMessage,
+  getDisplayText,
+} from "@/lib/public/content";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getCategoryDetailData, getSiteChrome } from "@/lib/public/queries";
 import { getCategoryAlternatePathnames } from "@/lib/public/seo";
@@ -72,11 +76,18 @@ export default async function CategoryDetailPage({
             {data.category.translation.name}
           </h1>
           <p className="max-w-3xl text-lg leading-8 text-muted">
-            {data.category.translation.shortDescription}
+            {getDisplayText(
+              data.category.translation.shortDescription,
+              locale === "fr"
+                ? "Le contenu de categorie detaille est en cours de consolidation."
+                : "Detailed category content is still being consolidated.",
+            )}
           </p>
-          <p className="max-w-4xl text-base leading-8 text-muted">
-            {data.category.translation.body}
-          </p>
+          {data.category.translation.body ? (
+            <p className="max-w-4xl text-base leading-8 text-muted">
+              {data.category.translation.body}
+            </p>
+          ) : null}
         </div>
 
         {data.category.children.length > 0 ? (
@@ -109,27 +120,37 @@ export default async function CategoryDetailPage({
               </Link>
             </Button>
           </div>
-          <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
-            {data.category.products.map((product) => (
-              <ProductCard
-                key={product.id}
-                locale={locale}
-                slug={product.translation.slug}
-                name={product.translation.name}
-                shortDescription={product.translation.shortDescription}
-                manufacturerName={product.manufacturerTranslation?.name}
-                availabilityStatus={product.availabilityStatus}
-                priceLabel={resolvePricingMessage({
-                  locale,
-                  amount: product.publicPriceAmount ? Number(product.publicPriceAmount) : null,
-                  currency: product.publicPriceCurrency,
-                  unitLabel: product.publicPriceUnitLabel,
-                  message: settings.translation?.defaultContactForPricingMessage ?? "",
-                })}
-                imageUrl={product.primaryImage?.publicUrl}
-              />
-            ))}
-          </div>
+          {data.category.products.length > 0 ? (
+            <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
+              {data.category.products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  locale={locale}
+                  slug={product.translation.slug}
+                  name={product.translation.name}
+                  shortDescription={product.translation.shortDescription}
+                  manufacturerName={product.manufacturerTranslation?.name}
+                  availabilityStatus={product.availabilityStatus}
+                  priceLabel={resolvePricingMessage({
+                    locale,
+                    amount: product.publicPriceAmount ? Number(product.publicPriceAmount) : null,
+                    currency: product.publicPriceCurrency,
+                    unitLabel: product.publicPriceUnitLabel,
+                    message:
+                      settings.translation?.defaultContactForPricingMessage ??
+                      getDefaultPricingFallbackMessage(locale),
+                  })}
+                  imageUrl={product.primaryImage?.publicUrl}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-3xl border border-line bg-white px-5 py-4 text-sm leading-7 text-muted">
+              {locale === "fr"
+                ? "Aucun produit public n est actuellement rattache a cette categorie."
+                : "No public products are currently attached to this category."}
+            </div>
+          )}
         </div>
       </div>
     </section>

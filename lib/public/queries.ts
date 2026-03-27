@@ -3,6 +3,12 @@ import { type PageKey, PublishStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { buildCategoryTree } from "@/lib/domain/category-tree";
 import type { PublicLocale } from "@/lib/i18n/config";
+import {
+  attachProductManufacturerRelation,
+  attachProductRelations,
+  attachTranslation,
+  pickFirstTranslation,
+} from "@/lib/public/query-helpers";
 import { getRenderablePublicDocuments } from "@/lib/public/document-visibility";
 
 const publishedWhere = { publishStatus: PublishStatus.published } as const;
@@ -44,7 +50,7 @@ export async function getSiteChrome(locale: PublicLocale) {
 
   return {
     ...settings,
-    translation,
+    translation: translation ?? null,
   };
 }
 
@@ -125,20 +131,18 @@ export async function getHomeData(locale: PublicLocale) {
     ]);
 
   return {
-    featuredCategories: featuredCategories.map((category) => ({
-      ...category,
-      translation: category.translations[0]!,
-    })),
-    featuredManufacturers: featuredManufacturers.map((manufacturer) => ({
-      ...manufacturer,
-      translation: manufacturer.translations[0]!,
-    })),
-    featuredProducts: featuredProducts.map((product) => ({
-      ...product,
-      translation: product.translations[0]!,
-      categoryTranslation: product.category.translations[0]!,
-      manufacturerTranslation: product.manufacturer.translations[0]!,
-    })),
+    featuredCategories: featuredCategories.flatMap((category) => {
+      const shaped = attachTranslation(category);
+      return shaped ? [shaped] : [];
+    }),
+    featuredManufacturers: featuredManufacturers.flatMap((manufacturer) => {
+      const shaped = attachTranslation(manufacturer);
+      return shaped ? [shaped] : [];
+    }),
+    featuredProducts: featuredProducts.flatMap((product) => {
+      const shaped = attachProductRelations(product);
+      return shaped ? [shaped] : [];
+    }),
     page,
     settings,
   };
@@ -173,12 +177,10 @@ export async function getProductsIndexData(locale: PublicLocale) {
 
   return {
     page,
-    products: products.map((product) => ({
-      ...product,
-      translation: product.translations[0]!,
-      categoryTranslation: product.category.translations[0]!,
-      manufacturerTranslation: product.manufacturer.translations[0]!,
-    })),
+    products: products.flatMap((product) => {
+      const shaped = attachProductRelations(product);
+      return shaped ? [shaped] : [];
+    }),
   };
 }
 
@@ -233,6 +235,17 @@ export async function getProductDetailData(locale: PublicLocale, slug: string) {
     return null;
   }
 
+  const categoryTranslation = pickFirstTranslation(
+    translation.product.category.translations,
+  );
+  const manufacturerTranslation = pickFirstTranslation(
+    translation.product.manufacturer.translations,
+  );
+
+  if (!categoryTranslation || !manufacturerTranslation) {
+    return null;
+  }
+
   const relatedProducts = await prisma.product.findMany({
     where: {
       ...publicEntityWhere(locale),
@@ -252,14 +265,14 @@ export async function getProductDetailData(locale: PublicLocale, slug: string) {
     product: {
       ...translation.product,
       translation,
-      categoryTranslation: translation.product.category.translations[0]!,
-      manufacturerTranslation: translation.product.manufacturer.translations[0]!,
+      categoryTranslation,
+      manufacturerTranslation,
       documents: getRenderablePublicDocuments(translation.product.documents),
     },
-    relatedProducts: relatedProducts.map((product) => ({
-      ...product,
-      translation: product.translations[0]!,
-    })),
+    relatedProducts: relatedProducts.flatMap((product) => {
+      const shaped = attachTranslation(product);
+      return shaped ? [shaped] : [];
+    }),
   };
 }
 
@@ -283,10 +296,10 @@ export async function getManufacturersIndexData(locale: PublicLocale) {
 
   return {
     page,
-    manufacturers: manufacturers.map((manufacturer) => ({
-      ...manufacturer,
-      translation: manufacturer.translations[0]!,
-    })),
+    manufacturers: manufacturers.flatMap((manufacturer) => {
+      const shaped = attachTranslation(manufacturer);
+      return shaped ? [shaped] : [];
+    }),
   };
 }
 
@@ -330,10 +343,10 @@ export async function getManufacturerDetailData(
     manufacturer: {
       ...translation.manufacturer,
       translation,
-      products: translation.manufacturer.products.map((product) => ({
-        ...product,
-        translation: product.translations[0]!,
-      })),
+      products: translation.manufacturer.products.flatMap((product) => {
+        const shaped = attachTranslation(product);
+        return shaped ? [shaped] : [];
+      }),
     },
   };
 }
@@ -350,13 +363,22 @@ export async function getCategoriesIndexData(locale: PublicLocale) {
     }),
   ]);
 
-  const nodes = categories.map((category) => ({
-    id: category.id,
-    name: category.translations[0]?.name ?? category.code,
-    parentId: category.parentId,
-    code: category.code,
-    translation: category.translations[0]!,
-  }));
+  const nodes = categories
+    .map((category) => {
+      const translation = pickFirstTranslation(category.translations);
+      if (!translation) {
+        return null;
+      }
+
+      return {
+        id: category.id,
+        name: translation.name ?? category.code,
+        parentId: category.parentId,
+        code: category.code,
+        translation,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
 
   return {
     page,
@@ -417,15 +439,14 @@ export async function getCategoryDetailData(
     category: {
       ...translation.category,
       translation,
-      children: translation.category.children.map((child) => ({
-        ...child,
-        translation: child.translations[0]!,
-      })),
-      products: translation.category.products.map((product) => ({
-        ...product,
-        translation: product.translations[0]!,
-        manufacturerTranslation: product.manufacturer.translations[0]!,
-      })),
+      children: translation.category.children.flatMap((child) => {
+        const shaped = attachTranslation(child);
+        return shaped ? [shaped] : [];
+      }),
+      products: translation.category.products.flatMap((product) => {
+        const shaped = attachProductManufacturerRelation(product);
+        return shaped ? [shaped] : [];
+      }),
     },
   };
 }

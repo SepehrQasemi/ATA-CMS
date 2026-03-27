@@ -85,7 +85,7 @@ export default async function AdminDashboardPage() {
                   <AdminStatusBadge kind="inquiry" status={inquiry.status} />
                 </div>
                 <p className="mt-3 text-sm leading-6 text-muted">
-                  {inquiry.companyName ?? "No company"} ·{" "}
+                  {inquiry.companyName ?? "No company"} <span aria-hidden="true">&middot;</span>{" "}
                   {inquiry.product?.id ?? inquiry.manufacturer?.id ?? "General inquiry"}
                 </p>
                 <p className="mt-3 text-sm leading-6">{inquiry.message}</p>
@@ -108,7 +108,8 @@ export default async function AdminDashboardPage() {
                   <div>
                     <p className="font-semibold">{locale.label}</p>
                     <p className="text-sm text-muted">
-                      {locale.direction.toUpperCase()} · {locale.nativeLabel ?? locale.label}
+                      {locale.direction.toUpperCase()} <span aria-hidden="true">&middot;</span>{" "}
+                      {locale.nativeLabel ?? locale.label}
                     </p>
                   </div>
                   <AdminStatusBadge

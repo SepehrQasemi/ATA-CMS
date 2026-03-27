@@ -8,9 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { PublicLocale } from "@/lib/i18n/config";
+import {
+  getDefaultPricingFallbackMessage,
+  getDisplayText,
+} from "@/lib/public/content";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getManufacturerDetailData, getSiteChrome } from "@/lib/public/queries";
 import { getManufacturerAlternatePathnames } from "@/lib/public/seo";
+import { sanitizeHref } from "@/lib/safe-url";
 
 export async function generateMetadata({
   params,
@@ -53,6 +58,23 @@ export default async function ManufacturerDetailPage({
     notFound();
   }
 
+  const logoSrc = sanitizeHref(data.manufacturer.logoMedia?.publicUrl, {
+    allowRelative: true,
+  });
+  const websiteHref = sanitizeHref(data.manufacturer.websiteUrl);
+  const summary = getDisplayText(
+    data.manufacturer.translation.summary,
+    locale === "fr"
+      ? "Presentation fabricant en cours de consolidation."
+      : "Manufacturer overview is being consolidated.",
+  );
+  const body = getDisplayText(
+    data.manufacturer.translation.body,
+    locale === "fr"
+      ? "Le profil detaille du fabricant sera complete avec les prochaines informations catalogue."
+      : "The detailed manufacturer profile will be completed with the next catalog update.",
+  );
+
   return (
     <section className="section-shell">
       <div className="content-shell space-y-10">
@@ -69,15 +91,19 @@ export default async function ManufacturerDetailPage({
 
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           <Card className="flex items-center justify-center overflow-hidden p-10">
-            {data.manufacturer.logoMedia?.publicUrl ? (
+            {logoSrc ? (
               <Image
-                src={data.manufacturer.logoMedia.publicUrl}
+                src={logoSrc}
                 alt={data.manufacturer.translation.name}
                 width={220}
                 height={128}
                 className="max-h-32 w-auto object-contain"
               />
-            ) : null}
+            ) : (
+              <div className="flex h-32 w-full items-center justify-center rounded-3xl bg-[#fff8f8] text-center text-sm font-semibold text-brand-strong">
+                {locale === "fr" ? "Logo fabricant a venir" : "Manufacturer logo pending"}
+              </div>
+            )}
           </Card>
           <div className="space-y-5">
             <Badge variant="muted">{data.manufacturer.originCountry ?? "Producer"}</Badge>
@@ -85,10 +111,10 @@ export default async function ManufacturerDetailPage({
               {data.manufacturer.translation.name}
             </h1>
             <p className="text-lg leading-8 text-muted">
-              {data.manufacturer.translation.summary}
+              {summary}
             </p>
             <p className="text-base leading-8 text-muted">
-              {data.manufacturer.translation.body}
+              {body}
             </p>
             <div className="flex flex-wrap gap-4">
               <Button asChild size="lg">
@@ -96,9 +122,9 @@ export default async function ManufacturerDetailPage({
                   {locale === "fr" ? "Contacter ATA" : "Contact ATA"}
                 </Link>
               </Button>
-              {data.manufacturer.websiteUrl ? (
+              {websiteHref ? (
                 <Button asChild variant="secondary" size="lg">
-                  <a href={data.manufacturer.websiteUrl} target="_blank">
+                  <a href={websiteHref} target="_blank" rel="noreferrer">
                     {locale === "fr" ? "Site fabricant" : "Manufacturer website"}
                   </a>
                 </Button>
@@ -111,20 +137,31 @@ export default async function ManufacturerDetailPage({
           <h2 className="text-2xl font-semibold">
             {locale === "fr" ? "Produits lies" : "Linked products"}
           </h2>
-          <div className="mt-6 grid gap-5 lg:grid-cols-3">
-            {data.manufacturer.products.map((product) => (
-              <ProductCard
-                key={product.id}
-                locale={locale}
-                slug={product.translation.slug}
-                name={product.translation.name}
-                shortDescription={product.translation.shortDescription}
-                availabilityStatus={product.availabilityStatus}
-                priceLabel={settings.translation?.defaultContactForPricingMessage ?? ""}
-                imageUrl={product.primaryImage?.publicUrl}
-              />
-            ))}
-          </div>
+          {data.manufacturer.products.length > 0 ? (
+            <div className="mt-6 grid gap-5 lg:grid-cols-3">
+              {data.manufacturer.products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  locale={locale}
+                  slug={product.translation.slug}
+                  name={product.translation.name}
+                  shortDescription={product.translation.shortDescription}
+                  availabilityStatus={product.availabilityStatus}
+                  priceLabel={
+                    settings.translation?.defaultContactForPricingMessage ??
+                    getDefaultPricingFallbackMessage(locale)
+                  }
+                  imageUrl={product.primaryImage?.publicUrl}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="mt-6 text-sm leading-7 text-muted">
+              {locale === "fr"
+                ? "Aucun produit public n est actuellement rattache a ce fabricant."
+                : "No public products are currently attached to this manufacturer."}
+            </p>
+          )}
         </Card>
       </div>
     </section>

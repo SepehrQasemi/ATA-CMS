@@ -1,0 +1,66 @@
+{
+  "nav": {
+    "about": "About",
+    "products": "Products",
+    "categories": "Categories",
+    "manufacturers": "Manufacturers",
+    "contact": "Contact",
+    "inquiry": "Contact us"
+  },
+  "footer": {
+    "companyBlurb": "Abadis Tejarat Arka is building a multilingual, inquiry-led public catalog for B2B sourcing conversations across products, categories, and manufacturers.",
+    "discover": "Discover",
+    "status": "Foundation status",
+    "localePolicy": "Public locale foundation: English and French. Persian remains modeled but non-public for MVP.",
+    "pricingPolicy": "Pricing remains informational only. Products without a public price must route users toward direct contact."
+  },
+  "home": {
+    "eyebrow": "Abadis Tejarat Arka / ATA",
+    "title": "Foundation for a serious multilingual B2B catalog, built around products, manufacturers, and inquiry-driven conversion.",
+    "description": "Phase 1 establishes the app architecture, route map, design token layer, locale boundaries, and admin protection required for the finalized ATA specification package.",
+    "heroPanelTitle": "ATA brand foundations are now encoded in the live scaffold.",
+    "heroPanelBody": "The palette, typography, and shell direction follow the ATA CRM audit while deliberately avoiding dashboard-first public composition.",
+    "trustPoints": [
+      "Locale-prefixed public routes for English and French from day one.",
+      "Persian modeled in architecture while staying non-public and non-indexable.",
+      "Protected admin shell prepared for structured CMS workflows."
+    ],
+    "featuredCategories": "Featured category directions",
+    "featuredManufacturers": "Featured manufacturer directions",
+    "foundationLabel": "Phase 1 milestone",
+    "foundationTitle": "App scaffolding, brand tokenization, admin protection, and locale architecture are in place.",
+    "foundationBody": "The next implementation steps connect this foundation to the finalized Prisma schema, publication rules, seed data, and content-managed public pages."
+  },
+  "pages": {
+    "about": {
+      "eyebrow": "About foundation",
+      "title": "Company page scaffold",
+      "body": "This route exists with the correct locale-aware structure and metadata shape. It will be connected to CMS-managed page content in the next phase.",
+      "note": "The underlying architecture separates language-neutral page identity from per-locale translation content, matching the specification package."
+    },
+    "products": {
+      "eyebrow": "Products foundation",
+      "title": "Product index scaffold",
+      "body": "The public product index route is live and ready for the catalog listing, filtering, and CTA patterns defined in the wireframes.",
+      "note": "Phase 2 activates the schema, relationships, and admin flows that will replace scaffold copy with managed product data."
+    },
+    "categories": {
+      "eyebrow": "Categories foundation",
+      "title": "Hierarchy-aware category routing",
+      "body": "Category routes are prepared for localized multi-level paths from the start, avoiding the common retrofit problem described in the docs.",
+      "note": "The detail route already accepts nested segments so the localized hierarchy path cache can drive public URLs cleanly."
+    },
+    "manufacturers": {
+      "eyebrow": "Manufacturer foundation",
+      "title": "Manufacturer-aware routing",
+      "body": "Manufacturers are treated as first-class public catalog entities, not a hidden lookup table or a reseller placeholder.",
+      "note": "Phase 2 will connect these routes to related product data and locale-specific manufacturer profiles."
+    },
+    "contact": {
+      "eyebrow": "Inquiry foundation",
+      "title": "Contact and inquiry route",
+      "body": "The contact path is reserved for a trustworthy B2B inquiry flow. It will later persist requests directly in the application database without paid dependencies.",
+      "note": "The final flow will store locale context, source-page context, and linked product or manufacturer information where applicable."
+    }
+  }
+}

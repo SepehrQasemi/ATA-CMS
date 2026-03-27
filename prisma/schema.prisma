@@ -1,0 +1,453 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum PublishStatus {
+  draft
+  review
+  published
+  archived
+}
+
+enum AvailabilityStatus {
+  in_stock
+  available_on_request
+  out_of_stock
+  discontinued
+}
+
+enum InquiryStatus {
+  new
+  qualified
+  answered
+  closed
+  spam
+}
+
+enum LocaleVisibilityStatus {
+  disabled
+  internal_only
+  public
+}
+
+enum PageKey {
+  home
+  about
+  products_index
+  categories_index
+  manufacturers_index
+  contact
+  privacy
+  legal
+}
+
+enum ContactRequestType {
+  general
+  product_inquiry
+  manufacturer_inquiry
+  pricing_request
+}
+
+enum MediaKind {
+  image
+  document
+}
+
+enum ProductDocumentType {
+  datasheet
+  catalog
+  certificate
+  brochure
+  other
+}
+
+model Locale {
+  code             String                 @id
+  label            String
+  nativeLabel      String?
+  direction        String
+  visibilityStatus LocaleVisibilityStatus @default(internal_only)
+  isDefaultPublic  Boolean                @default(false)
+  sortOrder        Int                    @default(0)
+  launchDate       DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  pageTranslations            PageTranslation[]
+  categoryTranslations        CategoryTranslation[]
+  manufacturerTranslations    ManufacturerTranslation[]
+  productTranslations         ProductTranslation[]
+  productSpecs                ProductSpec[]
+  productDocumentTranslations ProductDocumentTranslation[]
+  siteSettingTranslations     SiteSettingTranslation[]
+  contactRequests             ContactRequest[]           @relation("ContactRequestLocale")
+
+  @@map("locales")
+}
+
+model Media {
+  id               String    @id @default(cuid())
+  kind             MediaKind
+  storageKey       String    @unique
+  publicUrl        String?
+  mimeType         String
+  width            Int?
+  height           Int?
+  bytes            Int?
+  originalFilename String?
+  title            String?
+  focalPointX      Float?
+  focalPointY      Float?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  pagesAsHero            Page[]           @relation("PageHeroMedia")
+  categoriesAsHero       Category[]       @relation("CategoryHeroMedia")
+  manufacturersAsLogo    Manufacturer[]   @relation("ManufacturerLogoMedia")
+  manufacturersAsHero    Manufacturer[]   @relation("ManufacturerHeroMedia")
+  productsAsPrimary      Product[]        @relation("ProductPrimaryImageMedia")
+  productImages          ProductImage[]
+  productDocuments       ProductDocument[]
+  siteSettingsShareImage SiteSettings[]   @relation("SiteSettingsShareImage")
+
+  @@map("media")
+}
+
+model Page {
+  id               String        @id @default(cuid())
+  pageKey          PageKey       @unique
+  publishStatus    PublishStatus @default(draft)
+  isSystemPage     Boolean       @default(true)
+  sortOrder        Int           @default(0)
+  showInNavigation Boolean       @default(false)
+  heroMediaId      String?
+  templateVariant  String?
+  navigationGroup  String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  heroMedia     Media?             @relation("PageHeroMedia", fields: [heroMediaId], references: [id], onDelete: SetNull)
+  translations  PageTranslation[]
+  contactSource ContactRequest[]   @relation("ContactRequestPage")
+
+  @@map("pages")
+}
+
+model PageTranslation {
+  id                String        @id @default(cuid())
+  pageId            String
+  localeCode        String
+  title             String
+  slug              String?
+  summary           String?
+  contentBlocksJson String?
+  seoTitle          String?
+  seoDescription    String?
+  ogTitle           String?
+  ogDescription     String?
+  heroHeading       String?
+  publishStatus     PublishStatus @default(draft)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  locale Locale @relation(fields: [localeCode], references: [code], onDelete: Restrict)
+
+  @@unique([pageId, localeCode])
+  @@unique([localeCode, slug])
+  @@map("page_translations")
+}
+
+model Category {
+  id            String        @id @default(cuid())
+  code          String        @unique
+  parentId      String?
+  publishStatus PublishStatus @default(draft)
+  sortOrder     Int           @default(0)
+  depth         Int           @default(0)
+  isFeatured    Boolean       @default(false)
+  heroMediaId   String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  parent       Category?             @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children     Category[]            @relation("CategoryHierarchy")
+  heroMedia    Media?                @relation("CategoryHeroMedia", fields: [heroMediaId], references: [id], onDelete: SetNull)
+  translations CategoryTranslation[]
+  products     Product[]
+
+  @@map("categories")
+}
+
+model CategoryTranslation {
+  id                String        @id @default(cuid())
+  categoryId        String
+  localeCode        String
+  name              String
+  slugSegment       String
+  fullSlugPathCache String?
+  shortDescription  String?
+  body              String?
+  seoTitle          String?
+  seoDescription    String?
+  faqJson           String?
+  publishStatus     PublishStatus @default(draft)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  locale   Locale   @relation(fields: [localeCode], references: [code], onDelete: Restrict)
+
+  @@unique([categoryId, localeCode])
+  @@unique([localeCode, fullSlugPathCache])
+  @@map("category_translations")
+}
+
+model Manufacturer {
+  id            String        @id @default(cuid())
+  code          String        @unique
+  publishStatus PublishStatus @default(draft)
+  originCountry String?
+  websiteUrl    String?
+  logoMediaId   String?
+  heroMediaId   String?
+  isFeatured    Boolean       @default(false)
+  sortOrder     Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  logoMedia     Media?                     @relation("ManufacturerLogoMedia", fields: [logoMediaId], references: [id], onDelete: SetNull)
+  heroMedia     Media?                     @relation("ManufacturerHeroMedia", fields: [heroMediaId], references: [id], onDelete: SetNull)
+  translations  ManufacturerTranslation[]
+  products      Product[]
+  contactSource ContactRequest[]           @relation("ContactRequestManufacturer")
+
+  @@map("manufacturers")
+}
+
+model ManufacturerTranslation {
+  id             String        @id @default(cuid())
+  manufacturerId String
+  localeCode     String
+  name           String
+  slug           String
+  summary        String?
+  body           String?
+  seoTitle       String?
+  seoDescription String?
+  certificationsText String?
+  publishStatus  PublishStatus @default(draft)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  locale       Locale       @relation(fields: [localeCode], references: [code], onDelete: Restrict)
+
+  @@unique([manufacturerId, localeCode])
+  @@unique([localeCode, slug])
+  @@map("manufacturer_translations")
+}
+
+model Product {
+  id                   String             @id @default(cuid())
+  sku                  String?            @unique
+  categoryId           String
+  manufacturerId       String
+  publishStatus        PublishStatus      @default(draft)
+  availabilityStatus   AvailabilityStatus
+  publicPriceAmount    Decimal?
+  publicPriceCurrency  String?
+  publicPriceUnitLabel String?
+  priceLastVerifiedAt  DateTime?
+  isFeatured           Boolean            @default(false)
+  primaryImageMediaId  String?
+  sortOrder            Int                @default(0)
+  internalNotes        String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  category      Category              @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  manufacturer  Manufacturer          @relation(fields: [manufacturerId], references: [id], onDelete: Restrict)
+  primaryImage  Media?                @relation("ProductPrimaryImageMedia", fields: [primaryImageMediaId], references: [id], onDelete: SetNull)
+  translations  ProductTranslation[]
+  images        ProductImage[]
+  specs         ProductSpec[]
+  documents     ProductDocument[]
+  inquiries     ContactRequest[]      @relation("ContactRequestProduct")
+
+  @@map("products")
+}
+
+model ProductTranslation {
+  id                        String        @id @default(cuid())
+  productId                 String
+  localeCode                String
+  name                      String
+  slug                      String
+  shortDescription          String
+  longDescription           String?
+  availabilityNote          String?
+  contactForPricingMessage  String?
+  seoTitle                  String?
+  seoDescription            String?
+  metaKeywords              String?
+  publishStatus             PublishStatus @default(draft)
+  createdAt                 DateTime      @default(now())
+  updatedAt                 DateTime      @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  locale  Locale  @relation(fields: [localeCode], references: [code], onDelete: Restrict)
+
+  @@unique([productId, localeCode])
+  @@unique([localeCode, slug])
+  @@map("product_translations")
+}
+
+model ProductImage {
+  id         String   @id @default(cuid())
+  productId  String
+  mediaId    String
+  sortOrder  Int      @default(0)
+  isPrimary  Boolean  @default(false)
+  altHint    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  media   Media   @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+
+  @@index([productId, sortOrder])
+  @@map("product_images")
+}
+
+model ProductSpec {
+  id          String   @id @default(cuid())
+  productId   String
+  localeCode  String
+  label       String
+  value       String
+  unit        String?
+  sortOrder   Int      @default(0)
+  isHighlight Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  locale  Locale  @relation(fields: [localeCode], references: [code], onDelete: Restrict)
+
+  @@unique([productId, localeCode, label])
+  @@map("product_specs")
+}
+
+model ProductDocument {
+  id           String              @id @default(cuid())
+  productId    String
+  mediaId      String
+  documentType ProductDocumentType
+  isPublic     Boolean             @default(false)
+  sortOrder    Int                 @default(0)
+  expiresAt    DateTime?
+  internalNotes String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  product      Product                      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  media        Media                        @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+  translations ProductDocumentTranslation[]
+
+  @@map("product_documents")
+}
+
+model ProductDocumentTranslation {
+  id                String        @id @default(cuid())
+  productDocumentId String
+  localeCode        String
+  label             String
+  description       String?
+  publishStatus     PublishStatus @default(draft)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  productDocument ProductDocument @relation(fields: [productDocumentId], references: [id], onDelete: Cascade)
+  locale          Locale          @relation(fields: [localeCode], references: [code], onDelete: Restrict)
+
+  @@unique([productDocumentId, localeCode])
+  @@map("product_document_translations")
+}
+
+model ContactRequest {
+  id                String              @id @default(cuid())
+  requestType       ContactRequestType?
+  status            InquiryStatus       @default(new)
+  sourceLocaleCode  String
+  sourcePageId      String?
+  productId         String?
+  manufacturerId    String?
+  companyName       String?
+  contactName       String
+  email             String
+  phone             String?
+  country           String?
+  message           String
+  consentToContact  Boolean
+  utmSource         String?
+  utmMedium         String?
+  utmCampaign       String?
+  internalNotes     String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  sourceLocale  Locale        @relation("ContactRequestLocale", fields: [sourceLocaleCode], references: [code], onDelete: Restrict)
+  sourcePage    Page?         @relation("ContactRequestPage", fields: [sourcePageId], references: [id], onDelete: SetNull)
+  product       Product?      @relation("ContactRequestProduct", fields: [productId], references: [id], onDelete: SetNull)
+  manufacturer  Manufacturer? @relation("ContactRequestManufacturer", fields: [manufacturerId], references: [id], onDelete: SetNull)
+
+  @@map("contact_requests")
+}
+
+model SiteSettings {
+  id                       String   @id @default(cuid())
+  defaultLocaleCode        String
+  publicLocalesJson        String
+  contactEmail             String
+  phone                    String?
+  addressJson              String?
+  socialLinksJson          String?
+  mainNavigationJson       String?
+  footerNavigationJson     String?
+  defaultShareImageMediaId String?
+  searchConsoleVerification String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  defaultShareImage Media?                    @relation("SiteSettingsShareImage", fields: [defaultShareImageMediaId], references: [id], onDelete: SetNull)
+  translations      SiteSettingTranslation[]
+
+  @@map("site_settings")
+}
+
+model SiteSettingTranslation {
+  id                             String   @id @default(cuid())
+  siteSettingsId                 String
+  localeCode                     String
+  siteName                       String
+  siteTagline                    String?
+  defaultMetaTitleSuffix         String?
+  defaultMetaDescription         String?
+  footerCompanyBlurb             String?
+  contactIntro                   String?
+  defaultContactForPricingMessage String?
+  createdAt                      DateTime @default(now())
+  updatedAt                      DateTime @updatedAt
+
+  siteSettings SiteSettings @relation(fields: [siteSettingsId], references: [id], onDelete: Cascade)
+  locale       Locale       @relation(fields: [localeCode], references: [code], onDelete: Restrict)
+
+  @@unique([siteSettingsId, localeCode])
+  @@map("site_setting_translations")
+}

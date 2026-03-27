@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">
+  <ellipse cx="160" cy="118" rx="136" ry="90" fill="#f01616" />
+  <ellipse cx="160" cy="118" rx="129" ry="83" fill="none" stroke="#ffffff" stroke-width="9" />
+  <ellipse cx="160" cy="118" rx="140" ry="94" fill="none" stroke="#f01616" stroke-width="12" />
+  <text
+    x="160"
+    y="146"
+    text-anchor="middle"
+    font-family="Arial Black, Arial, sans-serif"
+    font-size="88"
+    font-weight="900"
+    letter-spacing="2"
+    fill="#ffffff"
+  >
+    ATA
+  </text>
+</svg>

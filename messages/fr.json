@@ -1,0 +1,66 @@
+{
+  "nav": {
+    "about": "À propos",
+    "products": "Produits",
+    "categories": "Catégories",
+    "manufacturers": "Fabricants",
+    "contact": "Contact",
+    "inquiry": "Nous contacter"
+  },
+  "footer": {
+    "companyBlurb": "Abadis Tejarat Arka construit un catalogue public multilingue, orienté produits, fabricants et demandes B2B.",
+    "discover": "Découvrir",
+    "status": "État de la fondation",
+    "localePolicy": "Locales publiques de base : anglais et français. Le persan reste modélisé mais non public pour le MVP.",
+    "pricingPolicy": "Le prix reste informatif uniquement. Sans prix public, la page produit doit orienter vers un contact direct."
+  },
+  "home": {
+    "eyebrow": "Abadis Tejarat Arka / ATA",
+    "title": "Fondation d'un catalogue B2B multilingue, sérieux et centré sur les produits, les fabricants et la conversion par demande.",
+    "description": "La phase 1 met en place l'architecture de l'application, la carte des routes, la couche de design, les limites locales et la protection de l'admin exigées par le package de spécification ATA.",
+    "heroPanelTitle": "Les bases de marque ATA sont désormais intégrées dans le scaffold vivant.",
+    "heroPanelBody": "La palette, la typographie et la direction de composition suivent l'audit ATA CRM tout en évitant une expérience publique copiée sur un dashboard.",
+    "trustPoints": [
+      "Routes publiques préfixées par locale pour l'anglais et le français dès le départ.",
+      "Persan modélisé dans l'architecture tout en restant non public et non indexable.",
+      "Shell admin protégé prêt pour les workflows CMS structurés."
+    ],
+    "featuredCategories": "Directions catégories",
+    "featuredManufacturers": "Directions fabricants",
+    "foundationLabel": "Jalon phase 1",
+    "foundationTitle": "Le scaffolding, la tokenisation de marque, la protection admin et l'architecture locale sont en place.",
+    "foundationBody": "Les prochaines étapes connecteront cette fondation au schéma Prisma finalisé, aux règles de publication, aux seeds et aux pages publiques gérées par contenu."
+  },
+  "pages": {
+    "about": {
+      "eyebrow": "Fondation À propos",
+      "title": "Scaffold de la page entreprise",
+      "body": "Cette route existe avec la bonne structure localisée et la bonne forme de métadonnées. Elle sera reliée au contenu CMS lors de la phase suivante.",
+      "note": "L'architecture sépare déjà l'identité neutre de la page et le contenu traduit par locale, conformément au package documentaire."
+    },
+    "products": {
+      "eyebrow": "Fondation Produits",
+      "title": "Scaffold de l'index produits",
+      "body": "La route publique des produits est prête pour la liste catalogue, les filtres et la stratégie CTA définis dans les wireframes.",
+      "note": "La phase 2 activera le schéma, les relations et les flux admin qui remplaceront ce contenu de structure par de vraies données produits."
+    },
+    "categories": {
+      "eyebrow": "Fondation Catégories",
+      "title": "Routage hiérarchique prêt",
+      "body": "Les routes catégories sont préparées pour des chemins localisés multi-niveaux dès le départ, sans retrofit tardif.",
+      "note": "La route détail accepte déjà des segments imbriqués afin d'accueillir le cache de chemin localisé."
+    },
+    "manufacturers": {
+      "eyebrow": "Fondation Fabricants",
+      "title": "Routage orienté fabricants",
+      "body": "Les fabricants sont traités comme de vraies entités publiques du catalogue, et non comme un simple champ technique ou un concept revendeur.",
+      "note": "La phase 2 reliera ces routes aux produits associés et aux profils fabricants localisés."
+    },
+    "contact": {
+      "eyebrow": "Fondation Demandes",
+      "title": "Route contact et demande",
+      "body": "La route contact est réservée à un parcours de demande B2B crédible. Elle enregistrera ensuite les demandes directement en base sans dépendance payante.",
+      "note": "Le flux final stockera la locale, la page source et, si besoin, le produit ou le fabricant lié."
+    }
+  }
+}

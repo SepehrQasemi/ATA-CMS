@@ -38,8 +38,8 @@ export default async function AdminDashboardPage() {
     <div className="space-y-8">
       <AdminPageHeader
         eyebrow="Dashboard"
-        title="ATA editorial foundation"
-        description="Operational overview for catalog content, locale posture, and the latest inquiry queue."
+        title="ATA-CMS dashboard"
+        description="Operational overview for catalog content, locale posture, publishing readiness, and the latest inquiry queue."
         action={
           <Button asChild>
             <Link href="/admin/products/new">Create product</Link>

@@ -3,6 +3,7 @@ import { type PageKey, PublishStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { buildCategoryTree } from "@/lib/domain/category-tree";
 import type { PublicLocale } from "@/lib/i18n/config";
+import { getRenderablePublicDocuments } from "@/lib/public/document-visibility";
 
 const publishedWhere = { publishStatus: PublishStatus.published } as const;
 
@@ -10,6 +11,22 @@ function localeWhere(locale: PublicLocale) {
   return {
     localeCode: locale,
     publishStatus: PublishStatus.published,
+  } as const;
+}
+
+function translationInclude(locale: PublicLocale) {
+  return {
+    where: localeWhere(locale),
+    take: 1,
+  } as const;
+}
+
+function publicEntityWhere(locale: PublicLocale) {
+  return {
+    ...publishedWhere,
+    translations: {
+      some: localeWhere(locale),
+    },
   } as const;
 }
 
@@ -35,17 +52,11 @@ export async function getPublicPage(locale: PublicLocale, pageKey: PageKey) {
   const page = await prisma.page.findFirst({
     where: {
       pageKey,
-      ...publishedWhere,
-      translations: {
-        some: localeWhere(locale),
-      },
+      ...publicEntityWhere(locale),
     },
     include: {
       heroMedia: true,
-      translations: {
-        where: { localeCode: locale },
-        take: 1,
-      },
+      translations: translationInclude(locale),
     },
   });
 
@@ -65,51 +76,32 @@ export async function getHomeData(locale: PublicLocale) {
       getPublicPage(locale, "home"),
       getSiteChrome(locale),
       prisma.category.findMany({
-        where: {
-          ...publishedWhere,
-          isFeatured: true,
-          translations: {
-            some: localeWhere(locale),
-          },
-        },
+        where: { ...publicEntityWhere(locale), isFeatured: true },
         include: {
           heroMedia: true,
-          translations: {
-            where: { localeCode: locale },
-            take: 1,
-          },
+          translations: translationInclude(locale),
         },
         orderBy: { sortOrder: "asc" },
         take: 4,
       }),
       prisma.product.findMany({
         where: {
-          ...publishedWhere,
+          ...publicEntityWhere(locale),
           isFeatured: true,
-          translations: {
-            some: localeWhere(locale),
-          },
+          category: publicEntityWhere(locale),
+          manufacturer: publicEntityWhere(locale),
         },
         include: {
           primaryImage: true,
-          translations: {
-            where: { localeCode: locale },
-            take: 1,
-          },
+          translations: translationInclude(locale),
           category: {
             include: {
-              translations: {
-                where: { localeCode: locale },
-                take: 1,
-              },
+              translations: translationInclude(locale),
             },
           },
           manufacturer: {
             include: {
-              translations: {
-                where: { localeCode: locale },
-                take: 1,
-              },
+              translations: translationInclude(locale),
             },
           },
         },
@@ -117,19 +109,10 @@ export async function getHomeData(locale: PublicLocale) {
         take: 4,
       }),
       prisma.manufacturer.findMany({
-        where: {
-          ...publishedWhere,
-          isFeatured: true,
-          translations: {
-            some: localeWhere(locale),
-          },
-        },
+        where: { ...publicEntityWhere(locale), isFeatured: true },
         include: {
           logoMedia: true,
-          translations: {
-            where: { localeCode: locale },
-            take: 1,
-          },
+          translations: translationInclude(locale),
           _count: {
             select: {
               products: true,
@@ -166,31 +149,21 @@ export async function getProductsIndexData(locale: PublicLocale) {
     getPublicPage(locale, "products_index"),
     prisma.product.findMany({
       where: {
-        ...publishedWhere,
-        translations: {
-          some: localeWhere(locale),
-        },
+        ...publicEntityWhere(locale),
+        category: publicEntityWhere(locale),
+        manufacturer: publicEntityWhere(locale),
       },
       include: {
         primaryImage: true,
-        translations: {
-          where: { localeCode: locale },
-          take: 1,
-        },
+        translations: translationInclude(locale),
         category: {
           include: {
-            translations: {
-              where: { localeCode: locale },
-              take: 1,
-            },
+            translations: translationInclude(locale),
           },
         },
         manufacturer: {
           include: {
-            translations: {
-              where: { localeCode: locale },
-              take: 1,
-            },
+            translations: translationInclude(locale),
           },
         },
       },
@@ -215,7 +188,11 @@ export async function getProductDetailData(locale: PublicLocale, slug: string) {
       localeCode: locale,
       slug,
       publishStatus: PublishStatus.published,
-      product: publishedWhere,
+      product: {
+        ...publishedWhere,
+        category: publicEntityWhere(locale),
+        manufacturer: publicEntityWhere(locale),
+      },
     },
     include: {
       product: {
@@ -233,27 +210,18 @@ export async function getProductDetailData(locale: PublicLocale, slug: string) {
             where: { isPublic: true },
             include: {
               media: true,
-              translations: {
-                where: { localeCode: locale },
-                take: 1,
-              },
+              translations: translationInclude(locale),
             },
             orderBy: { sortOrder: "asc" },
           },
           category: {
             include: {
-              translations: {
-                where: { localeCode: locale },
-                take: 1,
-              },
+              translations: translationInclude(locale),
             },
           },
           manufacturer: {
             include: {
-              translations: {
-                where: { localeCode: locale },
-                take: 1,
-              },
+              translations: translationInclude(locale),
             },
           },
         },
@@ -267,19 +235,15 @@ export async function getProductDetailData(locale: PublicLocale, slug: string) {
 
   const relatedProducts = await prisma.product.findMany({
     where: {
-      ...publishedWhere,
+      ...publicEntityWhere(locale),
       id: { not: translation.productId },
       categoryId: translation.product.categoryId,
-      translations: {
-        some: localeWhere(locale),
-      },
+      category: publicEntityWhere(locale),
+      manufacturer: publicEntityWhere(locale),
     },
     include: {
       primaryImage: true,
-      translations: {
-        where: { localeCode: locale },
-        take: 1,
-      },
+      translations: translationInclude(locale),
     },
     take: 3,
   });
@@ -290,10 +254,7 @@ export async function getProductDetailData(locale: PublicLocale, slug: string) {
       translation,
       categoryTranslation: translation.product.category.translations[0]!,
       manufacturerTranslation: translation.product.manufacturer.translations[0]!,
-      documents: translation.product.documents.map((document) => ({
-        ...document,
-        translation: document.translations[0] ?? null,
-      })),
+      documents: getRenderablePublicDocuments(translation.product.documents),
     },
     relatedProducts: relatedProducts.map((product) => ({
       ...product,
@@ -306,18 +267,10 @@ export async function getManufacturersIndexData(locale: PublicLocale) {
   const [page, manufacturers] = await Promise.all([
     getPublicPage(locale, "manufacturers_index"),
     prisma.manufacturer.findMany({
-      where: {
-        ...publishedWhere,
-        translations: {
-          some: localeWhere(locale),
-        },
-      },
+      where: publicEntityWhere(locale),
       include: {
         logoMedia: true,
-        translations: {
-          where: { localeCode: locale },
-          take: 1,
-        },
+        translations: translationInclude(locale),
         _count: {
           select: {
             products: true,
@@ -355,17 +308,12 @@ export async function getManufacturerDetailData(
           heroMedia: true,
           products: {
             where: {
-              ...publishedWhere,
-              translations: {
-                some: localeWhere(locale),
-              },
+              ...publicEntityWhere(locale),
+              category: publicEntityWhere(locale),
             },
             include: {
               primaryImage: true,
-              translations: {
-                where: { localeCode: locale },
-                take: 1,
-              },
+              translations: translationInclude(locale),
             },
             orderBy: { sortOrder: "asc" },
           },
@@ -394,17 +342,9 @@ export async function getCategoriesIndexData(locale: PublicLocale) {
   const [page, categories] = await Promise.all([
     getPublicPage(locale, "categories_index"),
     prisma.category.findMany({
-      where: {
-        ...publishedWhere,
-        translations: {
-          some: localeWhere(locale),
-        },
-      },
+      where: publicEntityWhere(locale),
       include: {
-        translations: {
-          where: { localeCode: locale },
-          take: 1,
-        },
+        translations: translationInclude(locale),
       },
       orderBy: [{ depth: "asc" }, { sortOrder: "asc" }],
     }),
@@ -441,38 +381,24 @@ export async function getCategoryDetailData(
           heroMedia: true,
           children: {
             where: {
-              ...publishedWhere,
-              translations: {
-                some: localeWhere(locale),
-              },
+              ...publicEntityWhere(locale),
             },
             include: {
-              translations: {
-                where: { localeCode: locale },
-                take: 1,
-              },
+              translations: translationInclude(locale),
             },
             orderBy: { sortOrder: "asc" },
           },
           products: {
             where: {
-              ...publishedWhere,
-              translations: {
-                some: localeWhere(locale),
-              },
+              ...publicEntityWhere(locale),
+              manufacturer: publicEntityWhere(locale),
             },
             include: {
               primaryImage: true,
-              translations: {
-                where: { localeCode: locale },
-                take: 1,
-              },
+              translations: translationInclude(locale),
               manufacturer: {
                 include: {
-                  translations: {
-                    where: { localeCode: locale },
-                    take: 1,
-                  },
+                  translations: translationInclude(locale),
                 },
               },
             },

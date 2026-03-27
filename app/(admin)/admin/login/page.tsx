@@ -22,14 +22,14 @@ export default async function AdminLoginPage({
             <BrandLogo href="/admin/login" shortLabel tone="light" />
             <div className="mt-10 space-y-5">
               <p className="eyebrow border-white/18 bg-white/8 text-white/75">
-                Admin CMS foundation
+                ATA-CMS admin
               </p>
               <h1 className="text-4xl font-semibold leading-tight tracking-[-0.03em]">
-                Protected editorial area for the ATA public website.
+                Protected editorial workspace for the ATA public website.
               </h1>
               <p className="max-w-md text-sm leading-7 text-white/76">
-                Phase 1 sets the route boundary, signed session cookie, and admin
-                shell so content workflows can land cleanly in the next phase.
+                Manage pages, catalog content, media, SEO posture, and inbound
+                inquiries from one local-safe MVP CMS.
               </p>
             </div>
           </div>

@@ -1,74 +1,72 @@
-# ATA Website
+# ATA-CMS
 
-Public multilingual website and lightweight admin CMS for `Abadis Tejarat Arka` (`ATA` as the compact brand form).
+`ATA-CMS` is the repository/project name for the public multilingual website and lightweight admin CMS of `Abadis Tejarat Arka` (`ATA` for compact brand usage).
 
-## Purpose
-
-This repository contains the finalized specification package and the implementation work for a standalone B2B catalog website. The product is a public, SEO-focused, inquiry-driven website with an embedded admin CMS. It is not an ecommerce system.
+The public product remains the ATA website. This repository is the implementation workspace for that website + CMS foundation.
 
 ## Current Status
 
-- Phase 0 complete: repository hygiene, baseline tracking, and documentation commit done
-- Phase 1 complete: Next.js foundation, strict TypeScript, Tailwind, next-intl, auth skeleton, Prisma, base layouts
-- Phase 2 complete: core domain model, admin CRUD foundation, publication rules, locale rules, seeded development data
-- Phase 3 complete: public multilingual website pages, inquiry flow, product/category/manufacturer experiences
-- Phase 4 complete: metadata, hreflang, sitemap, robots, locale-aware publication protections, non-public `fa` blocking
-- Phase 5 complete: responsive/mobile navigation, loading and not-found states, accessibility polish, motion restraint, testing and release-readiness pass
-- Source of truth remains the documentation package under `docs/`
+- Phases 0-5 are implemented
+- Public locales: `en`, `fr`
+- Internal-only modeled locale: `fa`
+- Inquiry persistence works locally without paid third-party services
+- Admin CRUD foundation exists for pages, categories, manufacturers, products, media, inquiries, and settings
+- SEO foundation exists: metadata, canonicals, hreflang, sitemap, robots, publication protections
+
+## Quickest Local Start
+
+### Windows
+
+1. Double-click [RUN_ME_WINDOWS.bat](./RUN_ME_WINDOWS.bat)
+2. Or run [RUN_ME_WINDOWS.ps1](./RUN_ME_WINDOWS.ps1)
+
+The script will:
+
+- create `.env` from `.env.example` if missing
+- run `npm install`
+- generate Prisma client
+- sync the local database schema
+- seed development data if the local DB is empty
+- start Next.js on `http://127.0.0.1:3000`
+
+To stop a background/local server on port 3000, run [STOP_LOCAL_WINDOWS.ps1](./STOP_LOCAL_WINDOWS.ps1) or [STOP_LOCAL_WINDOWS.bat](./STOP_LOCAL_WINDOWS.bat).
+
+### macOS / Linux
+
+Run [RUN_ME_MAC_LINUX.sh](./RUN_ME_MAC_LINUX.sh)
+
+To stop the local server on port 3000, run [STOP_LOCAL_MAC_LINUX.sh](./STOP_LOCAL_MAC_LINUX.sh).
+
+### Setup-only mode
+
+If you want only dependency/database preparation without starting the dev server:
+
+- Windows: `powershell -ExecutionPolicy Bypass -File .\RUN_ME_WINDOWS.ps1 -SetupOnly`
+- macOS/Linux: `./RUN_ME_MAC_LINUX.sh --setup-only`
+- npm: `npm run local:setup`
+
+## Local URLs
+
+- Public EN: `http://127.0.0.1:3000/en`
+- Public FR: `http://127.0.0.1:3000/fr`
+- Admin login: `http://127.0.0.1:3000/admin/login`
+
+Default local admin credentials come from `.env`:
+
+- `ATA_ADMIN_EMAIL=admin@abadis-tejarat-arka.local`
+- `ATA_ADMIN_PASSWORD=ChangeMe123!`
 
 ## Implemented Stack
 
 - Next.js App Router
-- TypeScript with strict mode
+- TypeScript strict mode
 - Tailwind CSS
-- Reusable shadcn-style UI primitives
-- Prisma
-- SQLite for local-safe development, PostgreSQL-ready schema structure for production
-- next-intl
-- Free/local-safe admin authentication with signed sessions
-- Vitest + Playwright for automated testing
-
-## Major Constraints
-
-- Public locales: `en` and `fr`
-- Default locale: `en`
-- `fa` must be fully modeled in admin but not public and not indexable in MVP
-- No cart, checkout, payment, or online ordering
-- No paid third-party service dependency required for MVP core flows
-- Products support manufacturer relation, category relation, optional public pricing, availability states, and public documents when content exists
-- Inquiries must be stored in the database and manageable from admin
-- Typography baseline for MVP: `Manrope`
-
-## Authoritative Documentation
-
-The following documents are the implementation source of truth:
-
-- `docs/00_project_overview.md`
-- `docs/03_sitemap.md`
-- `docs/04_domain_model.md`
-- `docs/05_multilingual_strategy.md`
-- `docs/06_seo_strategy.md`
-- `docs/07_ui_ux_spec.md`
-- `docs/08_cms_spec.md`
-- `docs/09_technical_architecture.md`
-- `docs/10_implementation_roadmap.md`
-- `docs/12_acceptance_checklist_for_build_phase.md`
-- `docs/13_final_product_decisions.md`
-- `docs/wireframes/*`
-- `docs/admin/*`
-- `docs/decisions/*`
-
-## Repository Layout
-
-- `docs/` specification package and implementation reference
-- `app/` Next.js App Router public site and admin CMS routes
-- `components/` design system and feature UI building blocks
-- `lib/` domain logic, validation, SEO, i18n, and data helpers
-- `prisma/` schema, migrations, and seed data
-- `tests/` unit and validation coverage
-- `e2e/` Playwright end-to-end coverage
-- `public/` brand, catalog, and document assets
-- `references/` supporting reference notes from the ATA ecosystem
+- Reusable shadcn-style primitives
+- Prisma ORM
+- SQLite for safe local MVP testing
+- next-intl locale-prefixed routing
+- Signed-cookie local-safe admin auth
+- Vitest + Playwright
 
 ## Core Commands
 
@@ -79,14 +77,48 @@ The following documents are the implementation source of truth:
 - `npm test`
 - `npm run coverage`
 - `npm run e2e`
+- `npm run local:setup`
+- `npm run local:start`
 - `npm run db:push`
-- `npm run db:migrate`
 - `npm run db:seed`
 
-## Implementation Discipline
+## Major Product Constraints
 
-- Follow the docs when implementation pressure conflicts with convenience
-- Make the smallest safe decision when a documentation gap blocks progress
-- Keep public website and admin CMS boundaries clean
-- Favor production-quality foundations over throwaway scaffolding
-- Keep `fa` modeled in admin but non-public and non-indexable for MVP
+- Official public company name: `Abadis Tejarat Arka`
+- Compact brand form: `ATA`
+- `ATA-CRM` is not the public website brand
+- MVP font: `Manrope`
+- No ecommerce flow
+- No cart / checkout / payment
+- No CRM integration in MVP
+- No supplier/reseller modeling in MVP
+- Categories support multi-level hierarchy
+- Products support manufacturer, category, availability, optional price, contact-for-pricing fallback, and documents
+- Inquiries are stored in DB and manageable in admin
+- `fa` is editable in admin but non-public and non-indexable
+
+## Repository Layout
+
+- `app/` App Router public + admin routes
+- `components/` UI building blocks
+- `lib/` domain, validation, SEO, i18n, public query helpers
+- `prisma/` schema, migrations, seed
+- `tests/` unit/integration-oriented tests
+- `e2e/` Playwright coverage
+- `docs/` authoritative spec package + implementation notes
+- `public/` brand, catalog, and document assets
+
+## Authoritative Docs
+
+- [00_project_overview.md](./docs/00_project_overview.md)
+- [03_sitemap.md](./docs/03_sitemap.md)
+- [04_domain_model.md](./docs/04_domain_model.md)
+- [05_multilingual_strategy.md](./docs/05_multilingual_strategy.md)
+- [06_seo_strategy.md](./docs/06_seo_strategy.md)
+- [07_ui_ux_spec.md](./docs/07_ui_ux_spec.md)
+- [08_cms_spec.md](./docs/08_cms_spec.md)
+- [09_technical_architecture.md](./docs/09_technical_architecture.md)
+- [10_implementation_roadmap.md](./docs/10_implementation_roadmap.md)
+- [12_acceptance_checklist_for_build_phase.md](./docs/12_acceptance_checklist_for_build_phase.md)
+- [13_final_product_decisions.md](./docs/13_final_product_decisions.md)
+- [14_release_readiness.md](./docs/14_release_readiness.md)
